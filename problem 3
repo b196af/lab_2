@@ -1,0 +1,320 @@
+#(a)
+import qiskit
+import numpy
+import numpy as np
+from qiskit import *
+from qiskit.visualization import plot_histogram, plot_bloch_vector , plot_bloch_multivector
+from math import sqrt, pi
+from qiskit import QuantumCircuit, execute, Aer, assemble
+from numpy.random import randint
+n = 100; # number of qubits used in the BB84
+np.random.seed(seed=0)
+## Step 1
+# Alice generates bits
+alice_bits = randint(2, size=n)
+print(alice_bits)
+print("Alice's first bit = %i" % alice_bits[0])
+## Step 2
+# Create an array to tell us which qubits are encoded in which bases
+alice_bases = randint(2, size=n)
+def encode_message(bit,base):
+    output=[]
+    for i in range(base.size):
+        qc = QuantumCircuit(1,1)
+        if base[i] == 0:
+            if bit[i] == 0:
+                pass
+            else:
+                qc.x(0) 
+        else :
+            if bit[i] == 0:
+                qc.h(0)
+            else:
+                qc.x(0)
+                qc.h(0)
+        output.append(qc)
+    return output
+message = encode_message(alice_bits, alice_bases)
+print(alice_bases)
+print("Alice's first chosen basis = %i" % alice_bases[0])
+def intercept_message(message, bases):
+    backend = Aer.get_backend('qasm_simulator')
+    measurements = []
+    for q in range(n):
+        if bases[q] == 0: # measuring in Z-basis
+            message[q].measure(0,0)
+        if bases[q] == 1: # measuring in X-basis
+            message[q].h(0)
+            message[q].measure(0,0)
+            message[q].h(0) # preparing the post-measurement state
+        result = execute(message[q], backend, shots=1, memory=True).result()
+        measured_bit = int(result.get_memory()[0])
+        measurements.append(measured_bit)
+    return measurements
+    
+    
+eve_bases = randint(2, size=n)
+
+
+
+intercepted_message = intercept_message(message, eve_bases)
+
+print(eve_bases)
+print("Eve's first chosen basis = %i" % alice_bases[0])
+print(intercepted_message)
+print("Eve's first intercepted message = %i" % intercepted_message[0])
+total_right = 0
+for i in range (n):
+    if int(intercepted_message[i]) == int(alice_bits[i]):
+        total_right+=1
+    else:
+        pass
+
+print("probability of Eve measure right is %f" %(total_right/n))
+
+#(b)
+#(i)
+import qiskit
+import numpy
+import numpy as np
+from qiskit import *
+from qiskit.visualization import plot_histogram, plot_bloch_vector , plot_bloch_multivector
+from math import sqrt, pi
+from qiskit import QuantumCircuit, execute, Aer, assemble
+from numpy.random import randint
+n = 100; # number of qubits used in the BB84
+np.random.seed(seed=0)
+## Step 1
+# Alice generates bits
+alice_bits = randint(2, size=n)
+print(alice_bits)
+print("Alice's first bit = %i" % alice_bits[0])
+## Step 2
+# Create an array to tell us which qubits are encoded in which bases
+alice_bases = randint(2, size=n)
+def encode_message(bit,base):
+    output=[]
+    for i in range(base.size):
+        qc = QuantumCircuit(1,1)
+        if base[i] == 0:
+            if bit[i] == 0:
+                pass
+            else:
+                qc.x(0) 
+        else :
+            if bit[i] == 0:
+                qc.h(0)
+            else:
+                qc.x(0)
+                qc.h(0)
+        output.append(qc)
+    return output
+message = encode_message(alice_bits, alice_bases)
+print(alice_bases)
+print("Alice's first chosen basis = %i" % alice_bases[0])
+
+def dumb_intercept_message(message, bases):
+    backend = Aer.get_backend('qasm_simulator')
+    measurements = []
+    for q in range(n):
+        message[q].measure(0,0)
+        # preparing the post-measurement state
+        result = execute(message[q], backend, shots=1, memory=True).result()
+        measured_bit = int(result.get_memory()[0])
+        measurements.append(measured_bit)
+    return measurements
+    
+    
+eve_bases = randint(2, size=n)
+
+
+
+intercepted_message = dumb_intercept_message(message, eve_bases)
+
+print(eve_bases)
+print("Eve's first chosen basis = %i" % alice_bases[0])
+print(intercepted_message)
+print("Eve's first intercepted message = %i" % intercepted_message[0])
+total_right = 0
+for i in range (n):
+    if int(intercepted_message[i]) == int(alice_bits[i]):
+        total_right+=1
+    else:
+        pass
+
+print("probability of Eve measure right is %f" %(total_right/n))
+
+#(ii)
+import qiskit
+import numpy
+import numpy as np
+from qiskit import *
+from qiskit.visualization import plot_histogram, plot_bloch_vector , plot_bloch_multivector
+from math import sqrt, pi
+from qiskit import QuantumCircuit, execute, Aer, assemble
+from numpy.random import randint
+n = 100; # number of qubits used in the BB84
+np.random.seed(seed=0)
+## Step 1
+# Alice generates bits
+alice_bits = randint(2, size=n)
+print(alice_bits)
+print("Alice's first bit = %i" % alice_bits[0])
+## Step 2
+# Create an array to tell us which qubits are encoded in which bases
+alice_bases = randint(2, size=n)
+def encode_message(bit,base):
+    output=[]
+    for i in range(base.size):
+        qc = QuantumCircuit(1,1)
+        if base[i] == 0:
+            if bit[i] == 0:
+                pass
+            else:
+                qc.x(0) 
+        else :
+            if bit[i] == 0:
+                qc.h(0)
+            else:
+                qc.x(0)
+                qc.h(0)
+        output.append(qc)
+    return output
+message = encode_message(alice_bits, alice_bases)
+print(alice_bases)
+print("Alice's first chosen basis = %i" % alice_bases[0])
+def special_intercept_message(message, bases):
+    backend = Aer.get_backend('qasm_simulator')
+    measurements = []
+    for q in range(n):
+        message[q].ry(-pi/4,0)
+        message[q].measure(0,0)
+        message[q].ry(pi/4,0)
+        # preparing the post-measurement state
+        result = execute(message[q], backend, shots=1, memory=True).result()
+        measured_bit = int(result.get_memory()[0])
+        measurements.append(measured_bit)
+    return measurements
+
+## Interception!!
+eve_bases = randint(2, size=n)
+
+
+
+#intercepted_message = intercept_message(message, eve_bases)
+#intercepted_message = dumb_intercept_message(message, eve_bases)
+intercepted_message = special_intercept_message(message, eve_bases)
+
+print(eve_bases)
+print("Eve's first chosen basis = %i" % alice_bases[0])
+print(intercepted_message)
+print("Eve's first intercepted message = %i" % intercepted_message[0])
+total_right = 0
+for i in range (n):
+    if int(intercepted_message[i]) == int(alice_bits[i]):
+        total_right+=1
+    else:
+        pass
+
+print("probability of Eve measure right is %f" %(total_right/n))
+
+#bonus
+import qiskit
+import numpy
+import numpy as np
+from qiskit import *
+from qiskit.visualization import plot_histogram, plot_bloch_vector , plot_bloch_multivector
+from math import sqrt, pi
+from qiskit import QuantumCircuit, execute, Aer, assemble
+from numpy.random import randint
+n = 1000; # number of qubits used in the BB84
+np.random.seed(seed=3)
+## Step 1
+# Alice generates bits
+alice_bits = randint(2, size=n)
+print(alice_bits)
+print("Alice's first bit = %i" % alice_bits[0])
+## Step 2
+# Create an array to tell us which qubits are encoded in which bases
+alice_bases = randint(3, size=n)
+def encode_message(bit,base):
+    output=[]
+    for i in range(base.size):
+        qc = QuantumCircuit(1,1)
+        if base[i] == 0:
+            if bit[i] == 0:
+                pass
+            else:
+                qc.x(0) 
+        elif base[i] == 1:
+            if bit[i] == 0:
+                qc.h(0)
+            else:
+                qc.x(0)
+                qc.h(0)
+        elif base[i] == 2:
+            if bit[i] == 0:
+                qc.rx(-pi/2,0)
+            else:
+                qc.rx(pi/2,0)
+        output.append(qc)
+    return output
+message = encode_message(alice_bits, alice_bases)
+print(alice_bases)
+print("Alice's first chosen basis = %i" % alice_bases[0])
+def intercept_message(message, bases):
+    backend = Aer.get_backend('qasm_simulator')
+    measurements = []
+    for q in range(n):
+        if bases[q] == 0: # measuring in Z-basis
+            message[q].measure(0,0)
+        elif bases[q] == 1: # measuring in X-basis
+            message[q].h(0)
+            message[q].measure(0,0)
+            message[q].h(0)
+        elif bases[q] == 2:
+            message[q].rx(pi/2,0)
+            message[q].measure(0,0)
+            message[q].rx(-pi/2,0)# preparing the post-measurement state
+        result = execute(message[q], backend, shots=1, memory=True).result()
+        measured_bit = int(result.get_memory()[0])
+        measurements.append(measured_bit)
+    return measurements
+
+def special_intercept_message(message, bases):
+    backend = Aer.get_backend('qasm_simulator')
+    measurements = []
+    for q in range(n):
+        message[q].rz(-pi/4,0)
+        message[q].ry(-0.955,0)
+        message[q].measure(0,0)
+        
+        
+        # preparing the post-measurement state
+        result = execute(message[q], backend, shots=1, memory=True).result()
+        measured_bit = int(result.get_memory()[0])
+        measurements.append(measured_bit)
+    return measurements
+ 
+ ## Interception!!
+np.random.seed(seed=5)
+eve_bases = randint(3, size=n)
+
+
+
+#intercepted_message = intercept_message(message, eve_bases)
+#intercepted_message = dumb_intercept_message(message, eve_bases)
+intercepted_message = special_intercept_message(message, eve_bases)
+
+print(eve_bases)
+print("Eve's first chosen basis = %i" % alice_bases[0])
+print(intercepted_message)
+print("Eve's first intercepted message = %i" % intercepted_message[0])
+total_right = 0
+for i in range (n):
+    if int(intercepted_message[i]) == int(alice_bits[i]):
+        total_right+=1
+    else:
+        pass
+
+print("probability of Eve measure right is %f" %(total_right/n))
